@@ -52,8 +52,10 @@ amqp.connect(config.connection_string).then(function(conn) {
     function emitMessage(msg) {
       try {
           var page_url = msg.content.wikipedia_page_url;
-          var image = wpimg(page_url);
-          msg.content.image_url = image;
+          if (page_url) {
+              var image = wpimg(page_url);
+              msg.content.image_url = image;
+          }
       } catch (e) {
       }
       io.emit('news',  JSON.parse(msg.content.toString()));
