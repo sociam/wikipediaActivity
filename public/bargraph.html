@@ -86,7 +86,7 @@
 
         function draw() {
             svg.selectAll(".bar")
-                .data(data).append("rect")
+                .data(data).enter().append("rect")
                 .attr("class", "bar")
                 .attr("x", function(d) {  return x(d.key); })
                 .attr("y", function(d) {   return y(d.value);  })
