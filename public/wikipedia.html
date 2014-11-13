@@ -40,11 +40,14 @@ body {
 <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
 <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 <script src="d3-cloud/d3.layout.cloud.js"></script>
-<div id="leftdiv" class = "a"></div>
+
+<div id="leftdiv" class="a"></div>
+<div id="rightDiv" class="b"></div>
+<div id="bottomDiv" class="c"></div>
+
 <script>
 (function() {
 	
-		var socket = io.connect('http://localhost:9001');
 		var countTotal = 1;
 		
 		var n = 243,
@@ -156,19 +159,8 @@ body {
 	
 		this.tick();
 
-		socket.on('news', function (data) {
-			console.log(data)	
-			++count;
-			
-		});	
-	})(); 
-</script>
 
-<div id="rightDiv" class = "b">
-<script>
-(function() {
-
-    var socket = io.connect('http://localhost:9001');
+    // words code
 
     var words = {};
     var fill = d3.scale.category20();
@@ -214,55 +206,49 @@ body {
 	     	     
       }
 
-    //ajax call
     function get_words() {
-        //make ajax call
 
-          var words_array = [];
-          for (key in words){
+        var words_array = [];
+        for (key in words){
             words_array.push({text: key, size: words[key]})
-          }
-    if(Object.keys(words).length >10){
-                words = {};
-         }
+        }
+        if(Object.keys(words).length >10){
+            words = {};
+        }
 
-          //render cloud
-          mycloud.stop().words(words_array).start();
-       
- };
+        //render cloud
+        mycloud.stop().words(words_array).start();
+    };
 
     //create SVG container
     d3.select("div.b").append("svg")
         .attr("width", 500)
         .attr("height", 500);
- 
-
-   socket.on('news', function (data) {
-  //console.log(data.wikipedia_page_name);
-  if(data.wikipedia_page_name != undefined){
-    console.log(data.wikipedia_page_name);
-    words[data.wikipedia_page_name]= 1;
-  }
-              
-      }); 
 
     //render first cloud
     get_words();
 
     //start streaming
     var interval = setInterval(function(){get_words()}, 2000);
+
+
+    //var socket = io.connect('http://localhost:9001');
+    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+    socket.on('news', function (data) {
+        // update graph data
+        console.log(data)	
+        ++count;
+
+        // update words
+        if(data.wikipedia_page_name != undefined){
+          console.log(data.wikipedia_page_name);
+          words[data.wikipedia_page_name]= 1;
+        }	
+    });	
+
 })();
 </script>
-</div>
 
-<div id="bottomDiv" class = "c">
-
-<script>
-
-
-</script>
-
-</div>
 
 </body>
 
