@@ -51,17 +51,20 @@ amqp.connect(config.connection_string).then(function(conn) {
 
     function emitMessage(msg) {
       try {
-        var page_url = msg.content.wikipedia_page_url;
+        var data = JSON.parse(msg.content.toString());
+        var page_url = data.wikipedia_page_url;
         if (page_url) {
           wpimg(page_url).then(function (image) {
-            msg.content.image_url = image;
+            data.image_url = image;
+            io.emit('news', data);
           }, function (e) {
-            //
+            // error querying etc
+            io.emit('news', data);
           });
         }
-        io.emit('news',  JSON.parse(msg.content.toString()));
       } catch (e) {
-        io.emit('news',  JSON.parse(msg.content.toString()));
+        console.error("error2", e);
+        io.emit('news', data);
       }
     }
 
