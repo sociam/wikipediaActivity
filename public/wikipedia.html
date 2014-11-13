@@ -238,8 +238,8 @@ body {
     var interval = setInterval(function(){get_words()}, 2000);
 
 
-    var socket = io.connect('http://localhost:9001');
-    //var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+    //var socket = io.connect('http://localhost:9001');
+    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
     socket.on('news', function (data) {
         // update graph data
         console.log(data)	
