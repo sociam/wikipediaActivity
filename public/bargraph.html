@@ -27,7 +27,7 @@
     <script src="d3-cloud/d3.layout.cloud.js"></script>
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script>
-        langCounts = {}
+        var langCounts = {};
 
         var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 
@@ -45,55 +45,53 @@
             .attr("width", w)
             .attr("height", h);
 
-        var data = langCounts;
 
-        var max_n = 0;
-        for (var d in data) {
-            max_n = Math.max(data[d].value, max_n);
-        }
+        // var max_n = 0;
+        // for (var d in langCounts) {
+        //     max_n = Math.max(langCounts[d].value, max_n);
+        // }
 
-        var dx = w / max_n;
-        var dy = h / data.length;
+        // var dx = w / max_n;
+        // var dy = h / langCounts.length;
 
-        // bars
-        var bar = svg.selectAll(".bar")
-            .data(data)
-            .enter()
-            .append("rect")
-            .attr("class", function(d, i) { return "bar " + d.value; })
-            .attr("x", function(d, i) { return 0;  })
-            .attr("y", function(d, i) { return dy * i; })
-            .attr("width", function(d, i) { return dx * d.n; })
-            .attr("height", dy);
+        // // bars
+        // var bar = svg.selectAll(".bar")
+        //     .data(langCounts)
+        //     .enter()
+        //     .append("rect")
+        //     .attr("class", function(d, i) { return "bar " + d.value; })
+        //     .attr("x", function(d, i) { return 0;  })
+        //     .attr("y", function(d, i) { return dy * i; })
+        //     .attr("width", function(d, i) { return dx * d.n; })
+        //     .attr("height", dy);
 
-        // labels
-        var lab = svg.selectAll("text")
-            .data(data)
-            .enter()
-            .append("text")
-            .attr("class", function(d, i) {
-                return "label " + d.key;
-            })
-            .attr("x", 5)
-            .attr("y", function(d, i) {
-                return dy * i + 15;
-            })
-            .text(function(d) {
-                return d.key + " (" + d.n + ")";
-            })
-            .attr("font-size", "15px")
-            .style("font-weight", "bold");
 
         function draw() {
+
+            var x = d3.scale.ordinal().range([0,w]),
+                y = d3.scale.linear().range([0,h]);
+
             svg.selectAll(".bar")
-                .data(data).enter().append("rect")
+                .data(Object.keys(langCounts)).enter().append("rect")
                 .attr("class", "bar")
-                .attr("x", function(d) {  return x(d.key); })
-                .attr("y", function(d) {   return y(d.value);  })
-                .attr("height", function(d) { return height - y(d.value); })
-                .attr("width", x.rangeBand());
+                .attr("x", function(lang,i) {  return x(lang); })
+                .attr("y", function(lang) {   return y(langCounts[lang]);  })
+                .attr("height", function(lang) { return h - y(langCounts[lang]); })
+                .attr("width", x.rangeBand())
+                .exit().remove();
             // removed data:
-            bar.exit().remove();
+            
+        // labels
+            var xlang = d3.scale.ordinal().range([0,w]);
+            svg.selectAll("text")
+                .data(Object.keys(langCounts))
+                .enter().append("text")
+                .attr("class", function(d, i) {  return "label " + d; })
+                .attr("x", function(lang) { return xlang(lang); })
+                .attr("y", function(d, i) {  return y(langCounts[lang]) - 15;  })
+                .text(function(lang) {  return lang + " (" + langCounts[lang] + ")";   })
+                .attr("font-size", "15px")
+                .style("font-weight", "bold");
         }
 
         socket.on('news', function(data) {
