@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 var amqp = require('amqplib');
-
 var app = require('http').createServer(handler)
 var io = require('socket.io')(app);
 var fs = require('fs');
+var wpimg = require('wikipedia-image');
+var config = require('./config');
 
 app.listen(9001);
 
@@ -28,7 +29,7 @@ io.on('connection', function (socket) {
   });
 });
 
-amqp.connect('amqp://localhost').then(function(conn) {
+amqp.connect(config.connection_string).then(function(conn) {
   process.once('SIGINT', function() { conn.close(); });
   return conn.createChannel().then(function(ch) {
     var ok = ch.assertExchange('wikipedia_hose', 'fanout', {durable: false});
@@ -48,12 +49,14 @@ amqp.connect('amqp://localhost').then(function(conn) {
     });
 
 
-   function emitMessage(msg) {
-
-	  io.emit('news',  JSON.parse(msg.content.toString()));
-
-
-
+    function emitMessage(msg) {
+      try {
+          var page_url = msg.content.wikipedia_page_url;
+          var image = wpimg(page_url);
+          msg.content.image_url = image;
+      } catch (e) {
+      }
+      io.emit('news',  JSON.parse(msg.content.toString()));
     }
 
   });

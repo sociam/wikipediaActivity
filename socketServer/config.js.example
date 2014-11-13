@@ -1,0 +1,3 @@
+module.exports = {
+    'connection_string': 'amqp://localhost'
+}

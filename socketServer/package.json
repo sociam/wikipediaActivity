@@ -1,13 +1,13 @@
 {
   "name": "socketServer",
   "version": "0.0.1",
-  "description": "",
   "main": "app.js",
   "dependencies": {
     "amqplib": "^0.3.0",
     "fs": "^0.0.2",
     "http": "^0.0.0",
-    "socket.io": "^1.2.0"
+    "socket.io": "^1.2.0",
+    "wikipedia-image": "~1.0.1"
   },
   "devDependencies": {},
   "scripts": {
