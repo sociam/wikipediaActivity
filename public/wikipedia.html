@@ -254,12 +254,12 @@ body {
         // images
         if (data.image_url && data.image_url != "") {
             var div = $("#bottomDiv");
-            if (div.children().length > 8) {
-                div.children()[0].remove();
-            }
             var img = new Image(data.image_url);
             img.onload = function () {
                 div.append($("<img class='thumbimg' src='"+data.image_url+"'>"));
+                if (div.children().length > 8) {
+                    div.children()[0].remove();
+                }
             };
             img.src = data.image_url;
         }
