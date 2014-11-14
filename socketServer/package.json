@@ -7,7 +7,8 @@
     "fs": "^0.0.2",
     "http": "^0.0.0",
     "socket.io": "^1.2.0",
-    "wikipedia-image": "~1.0.1"
+    "wikipedia-image": "~1.0.1",
+    "underscore": "~1.7.0"
   },
   "devDependencies": {},
   "scripts": {
