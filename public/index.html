@@ -262,10 +262,10 @@ body {
             var div = $("#bottomDiv");
             var img = new Image(image_url);
             img.onload = function () {
-                div.append($("<img class='thumbimg' src='"+image_url+"'>"));
-                if (div.children().length > 8) {
-                    div.children()[0].remove();
-                }
+              div.append($("<a href='#'><img class='thumbimg' src='"+image_url+"'></a>"));
+              if (div.children().length > 8) {
+                div.children()[0].remove();
+              }
             };
             img.src = image_url;
         }
