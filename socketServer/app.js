@@ -8,6 +8,10 @@ var config = require('./config');
 
 app.listen(9001);
 
+function showErr (e) {
+    console.error(e, e.stack);
+}
+
 function handler (req, res) {
     res.writeHead(200);
     res.end("");
@@ -29,48 +33,56 @@ io.on('connection', function (socket) {
     });
 });
 
-var emitWP = function (msg) {
+var emitMsg = function (outName, msg) {
     try {
         var data = JSON.parse(msg.content.toString());
-        io.emit('wikipedia_revisions', data);
+        io.emit(outName, data);
 
-        var page_url = data.wikipedia_page_url;
-        if (page_url) {
-            wpimg(page_url).then(function (image) {
-                if (image && image != "") {
-                    io.emit('wikipedia_images', {"image_url": image, "data": data});
-                }
-            }, function (e) {
-                // error querying etc
-            });
+        if (outName == "wikipedia_revisions") {
+            var page_url = data.wikipedia_page_url;
+            if (page_url) {
+                wpimg(page_url).then(function (image) {
+                    if (image && image != "") {
+                        io.emit('wikipedia_images', {"image_url": image, "data": data});
+                    }
+                }, function (e) {
+                    // error querying etc
+                });
+            }
         }
     } catch (e) {
         //
     }
 }
 
-amqp.connect(config.connection_string).then(function(conn) {
-    process.once('SIGINT', function() { conn.close(); });
-    return conn.createChannel().then(function(ch) {
-        var ok = ch.assertExchange('wikipedia_hose', 'fanout', {durable: false});
+var connectQueue = function (queueName, outName) {
+    return amqp.connect(config.connection_string).then(function(conn) {
+        process.once('SIGINT', function() { conn.close(); });
+        return conn.createChannel().then(function(ch) {
+            var ok = ch.assertExchange(queueName, 'fanout', {durable: false});
 
-        ok = ok.then(function() {
-            return ch.assertQueue('', {exclusive: true});
-        });
+            ok = ok.then(function() { return ch.assertQueue('', {exclusive: true}); });
 
-        ok = ok.then(function(qok) {
-            return ch.bindQueue(qok.queue, 'wikipedia_hose', '').then(function() {
-                return qok.queue;
+            ok = ok.then(function(qok) {
+                return ch.bindQueue(qok.queue, queueName, '').then(function() {
+                    return qok.queue;
+                });
             });
-        });
 
-        ok = ok.then(function(queue) {
-            return ch.consume(queue, emitWP, {noAck: true});
-        });
+            ok = ok.then(function(queue) {
+                return ch.consume(queue, function (msg) { emitMsg(outName, msg); }, {noAck: true});
+            });
 
-        return ok.then(function() {
-            console.log(' [*] Waiting for logs. To exit press CTRL+C');
+            return ok;
         });
     });
-}).then(null, console.warn);
+};
+
+var connect = connectQueue("wikipedia_hose", "wikipedia_revisions");
+connect = connect.then(function() { return connectQueue("twitter_hose", "tweets"); }, showErr);
+connect = connect.then(function() { return connectQueue("trends_hose", "trends"); }, showErr);
+connect = connect.then(function() { return connectQueue("spinn3r_hose", "spinn3r"); }, showErr);
+connect = connect.then(function() {
+    console.log("Ready.");
+}, showErr);
 
