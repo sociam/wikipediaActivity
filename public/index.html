@@ -250,8 +250,27 @@ body {
     var interval = setInterval(function(){get_words()}, 2000);
 
 
-    //var socket = io.connect('http://localhost:9001');
-    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+    var socket = io.connect('http://localhost:9001');
+    //var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+
+    socket.on('wikipedia_image', function (image_data) {
+        var data = image_data.data;
+        var image_url = image_data.image_url;
+
+        // images
+        if (image_url && image_url != "") {
+            var div = $("#bottomDiv");
+            var img = new Image(image_url);
+            img.onload = function () {
+                div.append($("<img class='thumbimg' src='"+image_url+"'>"));
+                if (div.children().length > 8) {
+                    div.children()[0].remove();
+                }
+            };
+            img.src = image_url;
+        }
+    });
+
     socket.on('news', function (data) {
         // update graph data
         console.log(data)	
@@ -262,21 +281,8 @@ body {
           console.log(data.wikipedia_page_name);
           words[data.wikipedia_page_name]= 1;
         }	
-
-        // images
-        if (data.image_url && data.image_url != "") {
-            var div = $("#bottomDiv");
-            var img = new Image(data.image_url);
-            img.onload = function () {
-                div.append($("<a href='#'> <img class='thumbimg' src='"+data.image_url+"'> </a>"));
-                if (div.children().length > 12) {
-                    div.children()[0].remove();
-                }
-            };
-            img.src = data.image_url;
-        }
-
     });	
+
 
 })();
 </script>

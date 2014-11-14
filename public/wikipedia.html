@@ -238,15 +238,6 @@ body {
         .attr("height", 500);
  
 
-   socket.on('news', function (data) {
-  //console.log(data.wikipedia_page_name);
-  if(data.wikipedia_page_name != undefined){
-    console.log(data.wikipedia_page_name);
-    words[data.wikipedia_page_name]= 1;
-  }
-              
-      }); 
-
     //render first cloud
     get_words();
 
@@ -261,8 +252,38 @@ body {
 <script>
 
 
+    var socket = io.connect('http://localhost:9001');
+    //var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 
+    socket.on('wikipedia_image', function (image_data) {
+        var data = image_data.data;
+        var image_url = image_data.image_url;
 
+        // images
+        if (image_url && image_url != "") {
+            var div = $("#bottomDiv");
+            var img = new Image(image_url);
+            img.onload = function () {
+                div.append($("<img class='thumbimg' src='"+image_url+"'>"));
+                if (div.children().length > 8) {
+                    div.children()[0].remove();
+                }
+            };
+            img.src = image_url;
+        }
+    });
+
+    socket.on('news', function (data) {
+        // update graph data
+        console.log(data)	
+        ++count;
+
+        // update words
+        if(data.wikipedia_page_name != undefined){
+          console.log(data.wikipedia_page_name);
+          words[data.wikipedia_page_name]= 1;
+        }	
+    });	
 
 </script>
 
