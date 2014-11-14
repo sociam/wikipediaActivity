@@ -32,38 +32,14 @@
         var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 
         var padding = 40;
-        var margin = {
-            top: 30,
-            right: 30,
-            bottom: 30,
-            left: 100
-        };
-        var w = 700 - margin.left - margin.right;
-        var h = 400 - margin.top - margin.bottom;
+   	var margin = {top: 6, right: 0, bottom: 20, left: 50},
+		    w = 600 - margin.right,
+		    h = 400 - margin.top - margin.bottom;
+
         var svg = d3.select("body")
             .append("svg")
             .attr("width", w)
             .attr("height", h);
-
-
-        // var max_n = 0;
-        // for (var d in langCounts) {
-        //     max_n = Math.max(langCounts[d].value, max_n);
-        // }
-
-        // var dx = w / max_n;
-        // var dy = h / langCounts.length;
-
-        // // bars
-        // var bar = svg.selectAll(".bar")
-        //     .data(langCounts)
-        //     .enter()
-        //     .append("rect")
-        //     .attr("class", function(d, i) { return "bar " + d.value; })
-        //     .attr("x", function(d, i) { return 0;  })
-        //     .attr("y", function(d, i) { return dy * i; })
-        //     .attr("width", function(d, i) { return dx * d.n; })
-        //     .attr("height", dy);
 
 
         function draw() {
@@ -77,8 +53,7 @@
                 .attr("x", function(lang,i) {  return x(lang); })
                 .attr("y", function(lang) {   return y(langCounts[lang]);  })
                 .attr("height", function(lang) { return h - y(langCounts[lang]); })
-                .attr("width", x.rangeBand())
-                .exit().remove();
+                .attr("width", x.rangeBand());
             // removed data:
             
         // labels
@@ -88,7 +63,7 @@
                 .enter().append("text")
                 .attr("class", function(d, i) {  return "label " + d; })
                 .attr("x", function(lang) { return xlang(lang); })
-                .attr("y", function(d, i) {  return y(langCounts[lang]) - 15;  })
+                //.attr("y", function(d, i) {  return y(langCounts[i]) - 15;  })
                 .text(function(lang) {  return lang + " (" + langCounts[lang] + ")";   })
                 .attr("font-size", "15px")
                 .style("font-weight", "bold");

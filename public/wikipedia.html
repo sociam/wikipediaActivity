@@ -4,6 +4,7 @@
 
 body {
   font: 10px sans-serif;
+	background-color: #eee;
 }
 
 .axis path,
@@ -34,26 +35,17 @@ body {
 
 }
 
-.thumbimg {
-    max-height: 200px;
-    max-width: 200px;
-}
-
 </style>
 <body>
 
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
 <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 <script src="d3-cloud/d3.layout.cloud.js"></script>
-
-<div id="leftdiv" class="a"></div>
-<div id="rightDiv" class="b"></div>
-<div id="bottomDiv" class="c"></div>
-
+<div id="leftdiv" class = "a"></div>
 <script>
 (function() {
 	
+		var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 		var countTotal = 1;
 		
 		var n = 243,
@@ -165,8 +157,19 @@ body {
 	
 		this.tick();
 
+		socket.on('news', function (data) {
+			console.log(data)	
+			++count;
+			
+		});	
+	})(); 
+</script>
 
-    // words code
+<div id="rightDiv" class = "b">
+<script>
+(function() {
+
+    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 
     var words = {};
     var fill = d3.scale.category20();
@@ -212,63 +215,58 @@ body {
 	     	     
       }
 
+    //ajax call
     function get_words() {
+        //make ajax call
 
-        var words_array = [];
-        for (key in words){
+          var words_array = [];
+          for (key in words){
             words_array.push({text: key, size: words[key]})
-        }
-        if(Object.keys(words).length >10){
-            words = {};
-        }
+          }
+    	if(Object.keys(words).length >10){
+                words = {};
+         }
 
-        //render cloud
-        mycloud.stop().words(words_array).start();
-    };
+          //render cloud
+          mycloud.stop().words(words_array).start();
+       
+ };
 
     //create SVG container
     d3.select("div.b").append("svg")
         .attr("width", 500)
         .attr("height", 500);
+ 
+
+   socket.on('news', function (data) {
+  //console.log(data.wikipedia_page_name);
+  if(data.wikipedia_page_name != undefined){
+    console.log(data.wikipedia_page_name);
+    words[data.wikipedia_page_name]= 1;
+  }
+              
+      }); 
 
     //render first cloud
     get_words();
 
     //start streaming
     var interval = setInterval(function(){get_words()}, 2000);
-
-
-    //var socket = io.connect('http://localhost:9001');
-    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
-    socket.on('news', function (data) {
-        // update graph data
-        console.log(data)	
-        ++count;
-
-        // update words
-        if(data.wikipedia_page_name != undefined){
-          console.log(data.wikipedia_page_name);
-          words[data.wikipedia_page_name]= 1;
-        }	
-
-        // images
-        if (data.image_url && data.image_url != "") {
-            var div = $("#bottomDiv");
-            var img = new Image(data.image_url);
-            img.onload = function () {
-                div.append($("<img class='thumbimg' src='"+data.image_url+"'>"));
-                if (div.children().length > 8) {
-                    div.children()[0].remove();
-                }
-            };
-            img.src = data.image_url;
-        }
-
-    });	
-
 })();
 </script>
+</div>
 
+<div id="bottomDiv" class = "c">
+
+<script>
+
+
+
+
+
+</script>
+
+</div>
 
 </body>
 
