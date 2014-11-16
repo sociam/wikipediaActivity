@@ -1,0 +1,64 @@
+0 info it worked if it ends with ok
+1 verbose cli [ '/usr/local/bin/node',
+1 verbose cli   '/usr/local/bin/npm',
+1 verbose cli   'install',
+1 verbose cli   './config' ]
+2 info using npm@1.4.23
+3 info using node@v0.10.31
+4 warn package.json socketServer@0.0.1 No description
+5 warn package.json socketServer@0.0.1 No repository field.
+6 warn package.json socketServer@0.0.1 No README data
+7 verbose readDependencies using package.json deps
+8 verbose cache add [ './config', null ]
+9 verbose cache add name=undefined spec="./config" args=["./config",null]
+10 verbose parsed url { protocol: null,
+10 verbose parsed url   slashes: null,
+10 verbose parsed url   auth: null,
+10 verbose parsed url   host: null,
+10 verbose parsed url   port: null,
+10 verbose parsed url   hostname: null,
+10 verbose parsed url   hash: null,
+10 verbose parsed url   search: null,
+10 verbose parsed url   query: null,
+10 verbose parsed url   pathname: './config',
+10 verbose parsed url   path: './config',
+10 verbose parsed url   href: './config' }
+11 silly lockFile 847f9aec-config ./config
+12 verbose lock ./config /home/rt506/.npm/847f9aec-config.lock
+13 info maybeGithub Attempting ./config from git://github.com/./config
+14 silly lockFile 0fcad5e4-git-github-com-config git://github.com/./config
+15 verbose lock git://github.com/./config /home/rt506/.npm/0fcad5e4-git-github-com-config.lock
+16 verbose addRemoteGit [ 'git://github.com/./config', 'master' ]
+17 verbose git clone git://github.com/./config Cloning into bare repository '/home/rt506/.npm/_git-remotes/git-github-com-config-0fcad5e4'...
+17 verbose git clone git://github.com/./config
+17 verbose git clone git://github.com/./config fatal: remote error:
+17 verbose git clone git://github.com/./config   Repository not found.
+18 silly lockFile 0fcad5e4-git-github-com-config git://github.com/./config
+19 silly lockFile 0fcad5e4-git-github-com-config git://github.com/./config
+20 info maybeGithub Attempting ./config from git+ssh://git@github.com:./config
+21 silly lockFile ad8fb6c4-git-github-com-config git@github.com:./config
+22 verbose lock git@github.com:./config /home/rt506/.npm/ad8fb6c4-git-github-com-config.lock
+23 verbose addRemoteGit [ 'git@github.com:./config', 'master' ]
+24 error git clone git@github.com:./config Cloning into bare repository '/home/rt506/.npm/_git-remotes/git-github-com-config-ad8fb6c4'...
+24 error git clone git@github.com:./config
+24 error git clone git@github.com:./config Warning: Permanently added the RSA host key for IP address '192.30.252.130' to the list of known hosts.
+24 error git clone git@github.com:./config Permission denied (publickey).
+24 error git clone git@github.com:./config fatal: The remote end hung up unexpectedly
+25 silly lockFile ad8fb6c4-git-github-com-config git@github.com:./config
+26 silly lockFile ad8fb6c4-git-github-com-config git@github.com:./config
+27 silly lockFile 847f9aec-config ./config
+28 silly lockFile 847f9aec-config ./config
+29 error addLocal Could not install ./config
+30 error Error: ENOENT, stat './config'
+31 error If you need help, you may report this *entire* log,
+31 error including the npm and node versions, at:
+31 error     <http://github.com/npm/npm/issues>
+32 error System Linux 3.2.0-65-generic
+33 error command "/usr/local/bin/node" "/usr/local/bin/npm" "install" "./config"
+34 error cwd /home/rt506/applications/socketIOExample/release/socketServer
+35 error node -v v0.10.31
+36 error npm -v 1.4.23
+37 error path ./config
+38 error code ENOENT
+39 error errno 34
+40 verbose exit [ 34, true ]

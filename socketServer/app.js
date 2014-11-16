@@ -4,7 +4,7 @@ var io = require('socket.io')(app);
 var fs = require('fs');
 var _ = require('underscore');
 var wpimg = require('wikipedia-image');
-var config = require('./config');
+//var config = require('./config');
 
 app.listen(9001);
 
@@ -56,7 +56,8 @@ var emitMsg = function (outName, msg) {
 }
 
 var connectQueue = function (queueName, outName) {
-    return amqp.connect(config.connection_string).then(function(conn) {
+    return amqp.connect("amqp://localhost").then(function(conn) {
+
         process.once('SIGINT', function() { conn.close(); });
         return conn.createChannel().then(function(ch) {
             var ok = ch.assertExchange(queueName, 'fanout', {durable: false});
