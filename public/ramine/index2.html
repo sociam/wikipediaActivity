@@ -5,6 +5,7 @@
 body {
   font: 10px sans-serif;
 	background-color: #eee;
+
 }
 
 .axis path,
@@ -35,17 +36,36 @@ body {
 
 }
 
+#bottomDiv {
+  float: left;
+  width: 100%;
+
+}
+
+
+.thumbimg {
+    max-height: 200px;
+    max-width: 200px;
+}
+
 </style>
+<head>
+<link rel="stylesheet" type="text/css" href="css/collage.css">
+</head>
 <body>
 
+<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
 <script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
 <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 <script src="d3-cloud/d3.layout.cloud.js"></script>
-<div id="leftdiv" class = "a"></div>
+
+<div id="leftdiv" class="a"></div>
+<div id="rightDiv" class="b"></div>
+<div id="bottomDiv" class="collage"></div>
+
 <script>
 (function() {
 	
-		var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
 		var countTotal = 1;
 		
 		var n = 243,
@@ -56,7 +76,7 @@ body {
 		
 		var margin = {top: 6, right: 0, bottom: 20, left: 50},
 		    width = 600 - margin.right,
-		    height = 400 - margin.top - margin.bottom;
+		    height = 500 - margin.top - margin.bottom;
 		
 		// X axis
 		var x = d3.time.scale()
@@ -157,19 +177,8 @@ body {
 	
 		this.tick();
 
-		socket.on('news', function (data) {
-			console.log(data)	
-			++count;
-			
-		});	
-	})(); 
-</script>
 
-<div id="rightDiv" class = "b">
-<script>
-(function() {
-
-    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+    // words code
 
     var words = {};
     var fill = d3.scale.category20();
@@ -177,7 +186,7 @@ body {
     var fontSize = d3.scale.log().range([50, 200]);
 
     //create my cloud object
-    var mycloud = d3.layout.cloud().size([500, 500])
+    var mycloud = d3.layout.cloud().size([600, 500])
           .words([])
           .padding(2)
           .rotate(function() { return ~~(Math.random() * 2) * 0; })
@@ -198,7 +207,7 @@ body {
         //render new tag cloud
         d3.select("div.b").selectAll("svg")
             .append("g")
-                 .attr("transform", "translate(300,300)")
+                 .attr("transform", "translate(300,250)")
                 .selectAll("text")
                 .data(words)
             .enter().append("text")
@@ -215,58 +224,63 @@ body {
 	     	     
       }
 
-    //ajax call
     function get_words() {
-        //make ajax call
 
-          var words_array = [];
-          for (key in words){
+        var words_array = [];
+        for (key in words){
             words_array.push({text: key, size: words[key]})
-          }
-    	if(Object.keys(words).length >10){
-                words = {};
-         }
+        }
+        if(Object.keys(words).length >10){
+            words = {};
+        }
 
-          //render cloud
-          mycloud.stop().words(words_array).start();
-       
- };
+        //render cloud
+        mycloud.stop().words(words_array).start();
+    };
 
     //create SVG container
     d3.select("div.b").append("svg")
-        .attr("width", 500)
+        .attr("width", 600)
         .attr("height", 500);
- 
-
-   socket.on('news', function (data) {
-  //console.log(data.wikipedia_page_name);
-  if(data.wikipedia_page_name != undefined){
-    console.log(data.wikipedia_page_name);
-    words[data.wikipedia_page_name]= 1;
-  }
-              
-      }); 
 
     //render first cloud
     get_words();
 
     //start streaming
     var interval = setInterval(function(){get_words()}, 2000);
+
+
+    //var socket = io.connect('http://localhost:9001');
+    var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+    socket.on('news', function (data) {
+        // update graph data
+        console.log(data)	
+        ++count;
+
+        // update words
+        if(data.wikipedia_page_name != undefined){
+          console.log(data.wikipedia_page_name);
+          words[data.wikipedia_page_name]= 1;
+        }	
+
+        // images
+        if (data.image_url && data.image_url != "") {
+            var div = $("#bottomDiv");
+            var img = new Image(data.image_url);
+            img.onload = function () {
+                div.append($("<a href='#'> <img class='thumbimg' src='"+data.image_url+"'> </a>"));
+                if (div.children().length > 12) {
+                    div.children()[0].remove();
+                }
+            };
+            img.src = data.image_url;
+        }
+
+    });	
+
 })();
 </script>
-</div>
 
-<div id="bottomDiv" class = "c">
-
-<script>
-
-
-
-
-
-</script>
-
-</div>
 
 </body>
 

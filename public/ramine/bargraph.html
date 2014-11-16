@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+    .bar {
+        fill: steelblue;
+    }
+    .bar:hover {
+        fill: brown;
+    }
+    .axis {
+        font: 10px sans-serif;
+    }
+    .axis path,
+    .axis line {
+        fill: none;
+        stroke: #000;
+        shape-rendering: crispEdges;
+    }
+    .x.axis path {
+        display: none;
+    }
+</style>
+
+<body>
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="d3-cloud/lib/d3/d3.js"></script>
+    <script src="d3-cloud/d3.layout.cloud.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script>
+        var langCounts = {};
+
+        var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
+
+        var padding = 40;
+   	var margin = {top: 6, right: 0, bottom: 20, left: 50},
+		    w = 600 - margin.right,
+		    h = 400 - margin.top - margin.bottom;
+
+        var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+
+        function draw() {
+
+            var x = d3.scale.ordinal().range([0,w]),
+                y = d3.scale.linear().range([0,h]);
+
+            svg.selectAll(".bar")
+                .data(Object.keys(langCounts)).enter().append("rect")
+                .attr("class", "bar")
+                .attr("x", function(lang,i) {  return x(lang); })
+                .attr("y", function(lang) {   return y(langCounts[lang]);  })
+                .attr("height", function(lang) { return h - y(langCounts[lang]); })
+                .attr("width", x.rangeBand());
+            // removed data:
+            
+        // labels
+            var xlang = d3.scale.ordinal().range([0,w]);
+            svg.selectAll("text")
+                .data(Object.keys(langCounts))
+                .enter().append("text")
+                .attr("class", function(d, i) {  return "label " + d; })
+                .attr("x", function(lang) { return xlang(lang); })
+                //.attr("y", function(d, i) {  return y(langCounts[i]) - 15;  })
+                .text(function(lang) {  return lang + " (" + langCounts[lang] + ")";   })
+                .attr("font-size", "15px")
+                .style("font-weight", "bold");
+        }
+
+        socket.on('news', function(data) {
+            //console.log(data.wikipedia_page_name);
+            if (data.wikipedia_language != undefined) {
+                if (data.wikipedia_language in langCounts) {
+                    langCounts[data.wikipedia_language] = langCounts[data.wikipedia_language] + 1;
+                } else {
+                    langCounts[data.wikipedia_language] = 0;
+                }
+
+                //langCounts = JSON.parse(langCounts);
+                console.log(langCounts);
+                draw();
+                //words[data.wikipedia_page_name]= 1;
+            }
+        });
+    </script>
