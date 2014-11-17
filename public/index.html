@@ -38,7 +38,7 @@ body {
   position: fixed;
   bottom: 0;
   right: 0;	  
-	  z-index:4;
+	z-index:4;
 }
 
 #collageContainer{
@@ -51,19 +51,18 @@ body {
 
 }
 
-#statsDiv {
-  position: fixed;
-  top: 0;
-  left: 0;	  
-  z-index:5;
-}
-
-
 #wordCloudDiv {
   position: fixed;
   top: 0;
   right: 0;	  
   z-index:6;
+}
+
+#statsDiv {
+  position: fixed;
+  top: 0;
+  left: 0;   
+  z-index:7;
 }
 
 
@@ -75,9 +74,15 @@ body {
 </style>
 <head>
 
+	<!-- External Resources-->
 	<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
 	<script src="map/libs/jquery-1.10.1.js"></script>
+	<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+	<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
+	<script src="d3-cloud/d3.layout.cloud.js"></script>
 
+
+	
 	<!-- Bootstrap -->
 	<!--http://getbootstrap.com/2.3.2/-->
 	<script src="map/libs/bootstrap/js/bootstrap.js"></script>
@@ -89,23 +94,19 @@ body {
 	<link href="https://google-developers.appspot.com/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=visualization"></script>
 
-	<!-- Generic -->
-	<link rel="stylesheet" href="map/css/index.css">
-	<link rel="stylesheet" href="map/css/pure.css">
+
 	<!-- Generic server specific functions -->
 	<script src="map/js/FMEServer.js" type="text/javascript"></script>
 
 	<!-- Spatial Dashboard JavaScript -->
 	<script src="map/js/twitterStream.js" type="text/javascript"></script>
 
-<script src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-<script src="http://d3js.org/d3.v3.js" charset="utf-8"></script>
-<script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-<script src="d3-cloud/d3.layout.cloud.js"></script>
+<!-- Generic -->
+  <link rel="stylesheet" type="text/css" href="css/stats.css">
+  <link rel="stylesheet" href="map/css/index.css">
+  <link rel="stylesheet" href="map/css/pure.css">
+  <link rel="stylesheet" type="text/css" href="css/collage.css">
 
-
-
-<link rel="stylesheet" type="text/css" href="css/collage.css">
 </head>
 <body onload="initialize('')">
 
@@ -123,15 +124,14 @@ body {
 	
 </div>
 
-<div id="statsDiv"></div>
-
-
 <div id="wordCloudDiv" class="b"></div>
+
+<div id="statsDiv" class="stats"></div>
+
 
 <script>
 (function() {
 	
-		var countTotal = 1;
 		
 		var n = 243,
 		    duration = 750,
@@ -314,6 +314,61 @@ body {
     //start streaming
     var interval = setInterval(function(){get_words()}, 2000);
 
+    //stats code
+
+
+
+
+
+
+
+    var width = 400;
+        height = 75;
+
+    var svgstats = d3.select("div.stats").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(25," + (height / 2) + ")");
+
+    function update(data) {
+
+      //console.log("updating");
+      // DATA JOIN
+      // Join new data with old elements, if any.
+      var text = svgstats.selectAll("text")
+          .data(data);
+
+      // UPDATE
+      // Update old elements as needed.
+      text.attr("class", "update");
+      text.attr("class", "statsText");
+
+
+      // ENTER
+      // Create new elements as needed.
+      text.enter().append("text")
+          .attr("class", "enter")
+          .attr("class", "statsText")
+          .attr("x", function(d, i) { return i * 24; })
+          .attr("dy", ".35em");
+
+      // ENTER + UPDATE
+      // Appending to the enter selection expands the update selection to include
+      // entering elements; so, operations on the update selection after appending to
+      // the enter selection will apply to both entering and updating nodes.
+      text.text(function(d) { return d; });
+
+      // EXIT
+      // Remove old elements as needed.
+      text.exit().remove();
+    };
+    
+    var intervalStats = setInterval(function(){update("Revs: "+countTotal.toString())}, 1000);
+
+    var countTotal = 0;
+
+    //SOCKET IOCODE
 
     var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
     //var socket = io.connect('http://sociamvm-app-001.ecs.soton.ac.uk:9001');
@@ -340,11 +395,13 @@ body {
         // update graph data
         //console.log(data)	
         ++count;
+        
 
         // update words
         if(data.wikipedia_page_name != undefined){
          //console.log(data.wikipedia_page_name);
           words[data.wikipedia_page_name]= 1;
+          ++countTotal;
         }	
     });	
 

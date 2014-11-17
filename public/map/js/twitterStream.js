@@ -40,7 +40,7 @@ function initialize() {
   var liveTweetsPos = new google.maps.MVCArray();
     heatmapPos = new google.maps.visualization.HeatmapLayer({
     data: liveTweetsPos,
-    radius: 15
+    radius: 25
   });
   var gradient = [
     'rgba(30,244,248,0)',
@@ -103,14 +103,16 @@ function initialize() {
         }	
     });	
 
-    socket.on('spinn3r', function (data) {
-        // update words
-	if(data.text != undefined){
-		if(data.text.indexOf("wikipedia.org") > -1){
-         	console.log(data);
-        	}
-	}
-    });  
+    //tooo too much for the browser to handle without parralel processing.
+
+ //    socket.on('spinn3r', function (data) {
+ //        // update words
+	// if(data.text != undefined){
+	// 	if(data.text.indexOf("wikipedia.org") > -1){
+ //         	console.log(data);
+ //        	}
+	// }
+ //    });  
 
 
 function pop_arrays(){
