@@ -29,8 +29,8 @@ body {
 
 
 .line {
-  fill: none;
-  stroke: steelblue;
+  fill: none; 
+  stroke: red;
   stroke-width: 1.5px;
 }
 
@@ -100,6 +100,8 @@ body {
 
 	<!-- Spatial Dashboard JavaScript -->
 	<script src="map/js/twitterStream.js" type="text/javascript"></script>
+  <script src="map/js/gmaps-heatmap.js" type="text/javascript"></script>
+
 
 <!-- Generic -->
   <link rel="stylesheet" type="text/css" href="css/stats.css">
@@ -140,8 +142,8 @@ body {
 		    data = d3.range(n).map(function() { return 0; }); // Create an empty data set e.g. 0,0,0,0, etc
 		
 		var margin = {top: 6, right: 5, bottom: 20, left: 50},
-		    width = 600 - margin.right,
-		    height = 300 - margin.top - margin.bottom;
+		    width = 500 - margin.right,
+		    height = 250 - margin.top - margin.bottom;
 		
 		// X axis
 		var x = d3.time.scale()
@@ -192,6 +194,7 @@ body {
 		// Y axis label
 		yaxsis.append("text")
 		    .attr("transform", "rotate(-90),translate(-250,-40)")
+        .attr("class", "y axis")
 		    .text("Wikipeda Edits Per Second");
 		
 			
@@ -295,7 +298,7 @@ body {
         for (key in words){
             words_array.push({text: key, size: words[key]})
         }
-        if(Object.keys(words).length >10){
+        if(Object.keys(words).length >15){
             words = {};
         }
 
@@ -322,7 +325,7 @@ body {
 
 
 
-    var width = 400;
+    var width =  500;
         height = 75;
 
     var svgstats = d3.select("div.stats").append("svg")
@@ -350,7 +353,7 @@ body {
       text.enter().append("text")
           .attr("class", "enter")
           .attr("class", "statsText")
-          .attr("x", function(d, i) { return i * 24; })
+          .attr("x", function(d, i) { return i * 20; })
           .attr("dy", ".35em");
 
       // ENTER + UPDATE
@@ -363,10 +366,22 @@ body {
       // Remove old elements as needed.
       text.exit().remove();
     };
+
+
+
+    function createStatsString(){
+
+      var statsStr = "Revs:"+countTotal.toString()
+                   + " Users:"+totalUsers.toString();
+      return statsStr;
+
+    };
     
-    var intervalStats = setInterval(function(){update("Revs: "+countTotal.toString())}, 1000);
+    var intervalStats = setInterval(function(){update(createStatsString())}, 1000);
 
     var countTotal = 0;
+    var users = {};
+    var totalUsers = 0;
 
     //SOCKET IOCODE
 
@@ -382,10 +397,12 @@ body {
             var div = $("#collageContainer");
             var img = new Image(image_url);
             img.onload = function () {
+              try{
               div.append($("<a href='#'><img src='"+image_url+"'></a>"));
               if (div.children().length > 8) {
                 div.children()[0].remove();
               }
+            }catch(err){}
             };
             img.src = image_url;
         }
@@ -393,7 +410,7 @@ body {
 
     socket.on('wikipedia_revisions', function (data) {
         // update graph data
-        //console.log(data)	
+        //console.log(data.wikipedia_language_geo);
         ++count;
         
 
@@ -402,7 +419,14 @@ body {
          //console.log(data.wikipedia_page_name);
           words[data.wikipedia_page_name]= 1;
           ++countTotal;
-        }	
+          if(data.wikipedia_user.username in users){
+            users[data.wikipedia_user.username] = users[data.wikipedia_user.username]+1;
+          }else{
+             users[data.wikipedia_user.username] = 1;
+          }
+          totalUsers = Object.keys(users).length;
+
+        }
     });	
 
 
